@@ -69,44 +69,43 @@ document.addEventListener('DOMContentLoaded', () => {
         reversedData.forEach(item => {
             const tr = document.createElement('tr');
             
-            // PENYESUAIAN SESUAI KELUARAN GOOGLE APPS SCRIPT
-            // 1. Tanggal (Diambil dari item.session karena di Sheets ada di kolom A)
+            // 1. TANGGAL (Terekam di item.session berdasarkan doGet Apps Script)
             let fullDate = item.session || getFormattedDate(new Date());
-            if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
+            if (typeof fullDate === 'string' && fullDate.includes('T')) {
                 const parsedDate = new Date(fullDate);
-                fullDate = isNaN(parsedDate.getTime()) ? getFormattedDate(new Date()) : getFormattedDate(parsedDate);
+                fullDate = isNaN(parsedDate.getTime()) ? fullDate : getFormattedDate(parsedDate);
             }
 
-            // 2. Jam (Diambil dari item.date)
-            const timeOnly = item.date || item.timeOnly || '-';
+            // 2. JAM (Terekam di item.date)
+            const jam = item.date || '-';
 
-            // 3. Sesi Pertemuan (Diambil dari item.timeOnly / item.time)
-            const session = item.timeOnly || item.time || 'Weekly Meeting';
+            // 3. SESI PERTEMUAN (Terekam di item.timeOnly)
+            const sesi = item.timeOnly || '-';
 
-            // 4. Nama Member (Diambil dari item.time jika item.name berisi nama)
-            const name = item.name || '-';
+            // 4. NAMA MEMBER (Terekam di item.time)
+            const nama = item.time || '-';
 
-            // 5. Kelas / ID (Diambil dari item.class)
-            const memberClass = item.class || '-';
+            // 5. KELAS / ID (Terekam di item.name)
+            const kelas = item.name || '-';
 
-            // 6. Status Kehadiran (Diambil dari item.status)
-            const status = item.status || 'Hadir';
+            // 6. STATUS KEHADIRAN (Terekam di item.class)
+            const statusMember = item.class || 'Hadir';
 
-            // Style Badge Status (Hanya membungkus status "Hadir/Izin/Sakit")
+            // Pewarnaan Badge Status
             let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
-            if (status.toString().toLowerCase().includes('izin')) {
+            if (statusMember.toString().toLowerCase().includes('izin')) {
                 statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
-            } else if (status.toString().toLowerCase().includes('sakit')) {
+            } else if (statusMember.toString().toLowerCase().includes('sakit')) {
                 statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
             }
 
             tr.innerHTML = `
                 <td><span class="date-pill">📅 ${fullDate}</span></td>
-                <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${timeOnly}</td>
-                <td><span class="session-pill">${session}</span></td>
-                <td style="font-weight: 700; color: #1e293b;">${name}</td>
-                <td style="color: #475569; font-weight: 600;">${memberClass}</td>
-                <td><span style="${statusBadgeStyle}">${status}</span></td>
+                <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${jam}</td>
+                <td><span class="session-pill">${sesi}</span></td>
+                <td style="font-weight: 700; color: #1e293b;">${nama}</td>
+                <td style="color: #475569; font-weight: 600;">${kelas}</td>
+                <td><span style="${statusBadgeStyle}">${statusMember}</span></td>
             `;
             tableBody.appendChild(tr);
         });
@@ -132,11 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 session: fullDateStr,
                 date: timeOnlyStr,
                 timeOnly: session,
-                time: session,
-                name: name,
-                class: memberId,
-                status: status,
-                notes: notes
+                time: name,
+                name: memberId,
+                class: status,
+                status: notes,
+                notes: ''
             };
 
             let localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
