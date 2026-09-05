@@ -69,27 +69,44 @@ document.addEventListener('DOMContentLoaded', () => {
         reversedData.forEach(item => {
             const tr = document.createElement('tr');
             
-            // Penyesuaian Pemetaan Kolom dari Google Apps Script
-            const fullDate = item.date || item.fullDate || getFormattedDate(new Date());
-            const timeOnly = item.timeOnly || item.time || '-';
-            const session = item.session || 'Weekly Meeting';
-            const name = item.name || item.fullName || '-';
-            const memberId = item.class || item.memberId || '-';
-            const status = item.status || 'Hadir';
+            // PEMETAAN KOLOM PRESISI SESUAI STRUKTUR DATABASE GOOGLE SHEETS
+            // 1. Sesi Pertemuan (misal: "Weekly Meeting - Public Speaking")
+            const session = item.session || item.Sesi || 'Weekly Meeting';
 
-            let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
-            if (status.toString().toLowerCase().includes('izin')) {
-                statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
-            } else if (status.toString().toLowerCase().includes('sakit')) {
-                statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
+            // 2. Format Tanggal (Mencegah format ISO T07:00:00.000Z)
+            let fullDate = item.date || item.fullDate || item.Tanggal || getFormattedDate(new Date());
+            if (fullDate.includes('T') && fullDate.includes('Z')) {
+                const parsedDate = new Date(fullDate);
+                fullDate = isNaN(parsedDate.getTime()) ? getFormattedDate(new Date()) : getFormattedDate(parsedDate);
             }
 
+            // 3. Jam / Waktu
+            const timeOnly = item.timeOnly || item.time || item.Waktu || '-';
+
+            // 4. Nama Lengkap Member (Mencegah tergeser ke status/catatan)
+            const name = item.name || item.fullName || item.memberName || item.Nama || '-';
+
+            // 5. Kelas / ID
+            const memberId = item.class || item.memberId || item.Kelas || '-';
+
+            // 6. Status Kehadiran (Hadir / Izin / Sakit)
+            const status = item.status || item.Status || 'Hadir';
+
+            // Style Badge Khusus Kolom Status (Background Hijau/Kuning/Merah hanya di teks status)
+            let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
+            if (status.toString().toLowerCase().includes('izin')) {
+                statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
+            } else if (status.toString().toLowerCase().includes('sakit')) {
+                statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
+            }
+
+            // PERBAIKAN URUTAN BARIS TABEL (HTML TH: Tanggal | Jam | Sesi | Nama | Kelas | Status)
             tr.innerHTML = `
                 <td><span class="date-pill">📅 ${fullDate}</span></td>
                 <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${timeOnly}</td>
                 <td><span class="session-pill">${session}</span></td>
                 <td style="font-weight: 700; color: #1e293b;">${name}</td>
-                <td>${memberId}</td>
+                <td style="color: #475569; font-weight: 600;">${memberId}</td>
                 <td><span style="${statusBadgeStyle}">${status}</span></td>
             `;
             tableBody.appendChild(tr);
