@@ -69,32 +69,30 @@ document.addEventListener('DOMContentLoaded', () => {
         reversedData.forEach(item => {
             const tr = document.createElement('tr');
             
-            // SESUAI DENGAN OBJECT APPS SCRIPT KAMU:
-            // { session, date, timeOnly, time, name, class, status, notes }
-
-            // 1. Tanggal
-            let fullDate = item.date || getFormattedDate(new Date());
+            // PENYESUAIAN SESUAI KELUARAN GOOGLE APPS SCRIPT
+            // 1. Tanggal (Diambil dari item.session karena di Sheets ada di kolom A)
+            let fullDate = item.session || getFormattedDate(new Date());
             if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
                 const parsedDate = new Date(fullDate);
                 fullDate = isNaN(parsedDate.getTime()) ? getFormattedDate(new Date()) : getFormattedDate(parsedDate);
             }
 
-            // 2. Waktu/Jam
-            const timeOnly = item.timeOnly || item.time || '-';
+            // 2. Jam (Diambil dari item.date)
+            const timeOnly = item.date || item.timeOnly || '-';
 
-            // 3. Sesi Pertemuan
-            const session = item.session || 'Weekly Meeting';
+            // 3. Sesi Pertemuan (Diambil dari item.timeOnly / item.time)
+            const session = item.timeOnly || item.time || 'Weekly Meeting';
 
-            // 4. Nama Member
+            // 4. Nama Member (Diambil dari item.time jika item.name berisi nama)
             const name = item.name || '-';
 
-            // 5. Kelas / ID
+            // 5. Kelas / ID (Diambil dari item.class)
             const memberClass = item.class || '-';
 
-            // 6. Status Kehadiran
+            // 6. Status Kehadiran (Diambil dari item.status)
             const status = item.status || 'Hadir';
 
-            // Style Badge Status
+            // Style Badge Status (Hanya membungkus status "Hadir/Izin/Sakit")
             let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
             if (status.toString().toLowerCase().includes('izin')) {
                 statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
@@ -102,8 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
             }
 
-            // MASUKKAN KE TABEL DENGAN URUTAN HEADER HTML V2:
-            // Hari & Tanggal | Jam | Sesi Pertemuan | Nama Member | Kelas/ID | Status
             tr.innerHTML = `
                 <td><span class="date-pill">📅 ${fullDate}</span></td>
                 <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${timeOnly}</td>
@@ -133,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeOnlyStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
             const record = {
-                session: session,
-                date: fullDateStr,
-                timeOnly: timeOnlyStr,
-                time: `${fullDateStr} (${timeOnlyStr})`,
+                session: fullDateStr,
+                date: timeOnlyStr,
+                timeOnly: session,
+                time: session,
                 name: name,
                 class: memberId,
                 status: status,
@@ -168,4 +164,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 4000);
         });
     }
-});s
+});
