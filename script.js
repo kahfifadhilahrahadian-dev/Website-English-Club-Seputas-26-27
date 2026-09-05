@@ -1,119 +1,147 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('attendanceForm');
-    const successToast = document.getElementById('successMessage');
-    const tableBody = document.getElementById('attendanceBody');
-    const recordCount = document.getElementById('recordCount');
-    const currentDateText = document.getElementById('currentDateText');
+// ==========================================
+// CONFIGURATION & DATABASE URL
+// ==========================================
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec';
 
-    // PASTE YOUR GOOGLE APPS SCRIPT URL HERE IF AVAILABLE
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec';
+// DOM Elements
+const attendanceForm = document.getElementById('attendanceForm');
+const attendanceDateInput = document.getElementById('attendanceDate');
+const attendanceTimeInput = document.getElementById('attendanceTime');
+const successToast = document.getElementById('successToast');
+const tableBody = document.getElementById('tableBody');
 
-    // Helper: Format Date to Indonesian Day and Date (e.g., Jumat, 12 September 2026)
-    function getFormattedDate(dateObj) {
-        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        
-        const dayName = days[dateObj.getDay()];
-        const dayNum = dateObj.getDate();
-        const monthName = months[dateObj.getMonth()];
-        const year = dateObj.getFullYear();
+// ==========================================
+// DATE & TIME AUTO-FILL
+// ==========================================
+function updateDateTime() {
+    const now = new Date();
+    
+    // Format Tanggal (Contoh: Sabtu, 5 September 2026)
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateString = now.toLocaleDateString('id-ID', optionsDate);
+    
+    // Format Waktu (Contoh: 16.49 WIB)
+    const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
-        return `${dayName}, ${dayNum} ${monthName} ${year}`;
+    if (attendanceDateInput) attendanceDateInput.value = dateString;
+    if (attendanceTimeInput) attendanceTimeInput.value = timeString;
+}
+
+// Update waktu saat halaman dibuka
+updateDateTime();
+
+// ==========================================
+// FETCH & DISPLAY DATA FROM GOOGLE SHEETS
+// ==========================================
+async function loadLiveAttendanceData() {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('PASTE_URL')) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">URL Database belum dikonfigurasi.</td></tr>`;
+        return;
     }
 
-    // Display Today's Date in Hero Header
-    const nowObj = new Date();
-    currentDateText.textContent = getFormattedDate(nowObj);
+    // Tampilkan loading saat mengambil data
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">🔄 Memuat data presensi terbaru...</td></tr>`;
 
-    // Local Storage Data Management
-    let attendanceData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
 
-    function updateTable() {
-        tableBody.innerHTML = '';
-        recordCount.textContent = `${attendanceData.length} Terdata`;
-
-        if (attendanceData.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">
-                        Belum ada data presensi terdaftar. Silakan isi form di atas!
-                    </td>
-                </tr>
-            `;
-            return;
+        if (data && data.length > 0) {
+            renderTable(data);
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada data presensi hari ini.</td></tr>`;
         }
-
-        attendanceData.forEach(item => {
-            const tr = document.createElement('tr');
-            
-            let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
-            if (item.status === 'Izin') {
-                statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
-            } else if (item.status === 'Sakit') {
-                statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
-            }
-
-            tr.innerHTML = `
-                <td><span class="date-pill">📅 ${item.fullDate || 'Jumat, 12 Sep 2026'}</span></td>
-                <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${item.timeOnly || item.time}</td>
-                <td><span class="session-pill">${item.session || 'Weekly Meeting'}</span></td>
-                <td style="font-weight: 700; color: #1e293b;">${item.name}</td>
-                <td>${item.memberId}</td>
-                <td><span style="${statusBadgeStyle}">${item.status}</span></td>
-            `;
-            tableBody.appendChild(tr);
-        });
+    } catch (error) {
+        console.error('Gagal mengambil data dari Google Sheets:', error);
+        // Fallback ke data lokal jika koneksi gagal
+        loadLocalData();
     }
+}
 
-    // Initial render
-    updateTable();
+// Render data ke dalam tabel HTML
+function renderTable(dataList) {
+    tableBody.innerHTML = ''; // Bersihkan tabel
+    
+    // Urutkan agar data paling baru berada di paling atas
+    const reversedData = [...dataList].reverse();
 
-    // Form submission handler
-    form.addEventListener('submit', (e) => {
+    reversedData.forEach((item, index) => {
+        const row = document.createElement('tr');
+        
+        // Status Badge Style
+        let statusClass = 'badge-hadir';
+        if (item.status === 'Izin') statusClass = 'badge-izin';
+        if (item.status === 'Sakit') statusClass = 'badge-sakit';
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.time || item.timestamp || '-'}</td>
+            <td><strong>${item.name || item.memberName}</strong></td>
+            <td>${item.class || item.memberId}</td>
+            <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Fallback jika fetch gagal (menggunakan LocalStorage)
+function loadLocalData() {
+    const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
+    if (localData.length > 0) {
+        renderTable(localData);
+    } else {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Gagal memuat data live. Belum ada data lokal.</td></tr>`;
+    }
+}
+
+// ==========================================
+// FORM SUBMISSION HANDLER
+// ==========================================
+if (attendanceForm) {
+    attendanceForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const session = document.getElementById('sessionName').value;
-        const name = document.getElementById('fullName').value.trim();
-        const memberId = document.getElementById('memberId').value.trim();
-        const status = document.getElementById('status').value;
-        const notes = document.getElementById('notes').value.trim();
-        
-        const now = new Date();
-        const fullDateStr = getFormattedDate(now);
-        const timeOnlyStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-
         const record = {
-            fullDate: fullDateStr,
-            timeOnly: timeOnlyStr,
-            session: session,
-            name: name,
-            memberId: memberId,
-            status: status,
-            notes: notes,
-            time: `${fullDateStr} (${timeOnlyStr})`
+            session: document.getElementById('sessionName').value,
+            date: attendanceDateInput.value,
+            timeOnly: attendanceTimeInput.value,
+            time: `${attendanceDateInput.value} (${attendanceTimeInput.value})`,
+            name: document.getElementById('memberName').value,
+            class: document.getElementById('memberId').value,
+            status: document.getElementById('status').value,
+            notes: document.getElementById('notes').value
         };
 
-        attendanceData.unshift(record);
-        localStorage.setItem('ec_seputas_attendance', JSON.stringify(attendanceData));
+        // 1. Simpan sementara ke LocalStorage
+        const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
+        localData.unshift(record);
+        localStorage.setItem('ec_seputas_attendance', JSON.stringify(localData));
 
-        updateTable();
-
-        // Send to Google Sheets if configured
-        if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI') {
+        // 2. Kirim ke Google Sheets Database
+        if (GOOGLE_SCRIPT_URL) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(record)
+            }).then(() => {
+                // Beri jeda 1.5 detik lalu muat ulang tabel live dari Sheets
+                setTimeout(() => {
+                    loadLiveAttendanceData();
+                }, 1500);
             }).catch(err => console.error('Error sending to Google Sheets:', err));
         }
 
-        // UI Feedback
+        // 3. Tampilkan Notifikasi Sukses & Reset Form
         successToast.classList.remove('hidden');
-        form.reset();
+        attendanceForm.reset();
+        updateDateTime(); // Isi kembali tanggal & waktu otomatis
 
         setTimeout(() => {
             successToast.classList.add('hidden');
         }, 4000);
     });
-});
+}
+
+// Muat data live dari Google Sheets saat halaman pertama kali dibuka
+document.addEventListener('DOMContentLoaded', loadLiveAttendanceData);
