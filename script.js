@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIGURATION & DATABASE URL
 // ==========================================
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnZVk6PrF9XjWz5uaZz5IrwpGaAyUL66SQR5_xQlJKy328OiN2_nWKn0tPFxd8c-Bv0A/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLViCqwsjJXWF_m_vG9fe7ppYo5j2qrigrN0jh9VShJvnjx8oCK_UqbEf2yu3aSOskVw/exec';
 
 // DOM Elements
 const attendanceForm = document.getElementById('attendanceForm');
@@ -39,43 +39,47 @@ async function loadLiveAttendanceData() {
         return;
     }
 
-    // Tampilkan loading saat mengambil data
+    // Tampilkan indikator loading saat mengambil data dari Google Sheets
     tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">🔄 Memuat data presensi terbaru...</td></tr>`;
 
     try {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'GET',
+            redirect: 'follow'
+        });
+        
         const data = await response.json();
 
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
             renderTable(data);
         } else {
             tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada data presensi hari ini.</td></tr>`;
         }
     } catch (error) {
         console.error('Gagal mengambil data dari Google Sheets:', error);
-        // Fallback ke data lokal jika koneksi gagal
+        // Fallback ke data lokal jika koneksi terganggu
         loadLocalData();
     }
 }
 
 // Render data ke dalam tabel HTML
 function renderTable(dataList) {
-    tableBody.innerHTML = ''; // Bersihkan tabel
+    tableBody.innerHTML = ''; // Bersihkan isi tabel
     
-    // Urutkan agar data paling baru berada di paling atas
+    // Urutkan agar data paling baru berada di baris paling atas
     const reversedData = [...dataList].reverse();
 
     reversedData.forEach((item, index) => {
         const row = document.createElement('tr');
         
-        // Status Badge Style
+        // Penyesuaian gaya badge status
         let statusClass = 'badge-hadir';
         if (item.status === 'Izin') statusClass = 'badge-izin';
         if (item.status === 'Sakit') statusClass = 'badge-sakit';
 
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${item.time || item.timestamp || '-'}</td>
+            <td>${item.time || item.timeOnly || item.timestamp || '-'}</td>
             <td><strong>${item.name || item.memberName}</strong></td>
             <td>${item.class || item.memberId}</td>
             <td><span class="status-badge ${statusClass}">${item.status}</span></td>
@@ -84,7 +88,7 @@ function renderTable(dataList) {
     });
 }
 
-// Fallback jika fetch gagal (menggunakan LocalStorage)
+// Fallback jika fetch gagal (membaca LocalStorage)
 function loadLocalData() {
     const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
     if (localData.length > 0) {
@@ -125,7 +129,7 @@ if (attendanceForm) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(record)
             }).then(() => {
-                // Beri jeda 1.5 detik lalu muat ulang tabel live dari Sheets
+                // Beri jeda 1.5 detik lalu muat ulang tabel secara live dari Sheets
                 setTimeout(() => {
                     loadLiveAttendanceData();
                 }, 1500);
