@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTable();
 
         // Send to Google Sheets if configured
-        if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI') {
+        if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec') {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
