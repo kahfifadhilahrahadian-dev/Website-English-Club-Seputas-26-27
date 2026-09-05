@@ -5,29 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const recordCount = document.getElementById('recordCount');
     const currentDateText = document.getElementById('currentDateText');
 
-    // URL Google Apps Script yang Aktif
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLViCqwsjJXWF_m_vG9fe7ppYo5j2qrigrN0jh9VShJvnjx8oCK_UqbEf2yu3aSOskVw/exec';
 
-    // Helper: Format Tanggal Indonesia
     function getFormattedDate(dateObj) {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         
-        const dayName = days[dateObj.getDay()];
-        const dayNum = dateObj.getDate();
-        const monthName = months[dateObj.getMonth()];
-        const year = dateObj.getFullYear();
-
-        return `${dayName}, ${dayNum} ${monthName} ${year}`;
+        return `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
     }
 
-    // Tampilkan Tanggal Hari Ini di Header Presensi
     const nowObj = new Date();
     if (currentDateText) {
         currentDateText.textContent = getFormattedDate(nowObj);
     }
 
-    // Function: Ambil Data Live dari Google Sheets
     async function loadLiveAttendanceData() {
         if (!tableBody) return;
 
@@ -53,13 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Gagal mengambil data dari Google Sheets:', error);
-            // Fallback ke LocalStorage jika koneksi bermasalah
             const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
             renderTable(localData);
         }
     }
 
-    // Function: Render Data ke Tabel
     function renderTable(dataList) {
         tableBody.innerHTML = '';
         if (recordCount) recordCount.textContent = `${dataList.length} Terdata`;
@@ -75,19 +64,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Urutkan data terbaru di paling atas
         const reversedData = [...dataList].reverse();
 
         reversedData.forEach(item => {
             const tr = document.createElement('tr');
             
-            // Baca properti secara fleksibel
-            const fullDate = item.fullDate || item.date || item.Tanggal || getFormattedDate(new Date());
-            const timeOnly = item.timeOnly || item.time || item.Waktu || '-';
-            const session = item.session || item.Sesi || 'Weekly Meeting';
-            const name = item.name || item.fullName || item.memberName || item.Nama || '-';
-            const memberId = item.memberId || item.class || item.Kelas || '-';
-            const status = item.status || item.Status || 'Hadir';
+            // Penyesuaian Pemetaan Kolom dari Google Apps Script
+            const fullDate = item.date || item.fullDate || getFormattedDate(new Date());
+            const timeOnly = item.timeOnly || item.time || '-';
+            const session = item.session || 'Weekly Meeting';
+            const name = item.name || item.fullName || '-';
+            const memberId = item.class || item.memberId || '-';
+            const status = item.status || 'Hadir';
 
             let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;';
             if (status.toString().toLowerCase().includes('izin')) {
@@ -108,10 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ambil data live pertama kali saat web dibuka
     loadLiveAttendanceData();
 
-    // Handler Form Submit
     if (form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -127,22 +113,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeOnlyStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
             const record = {
-                fullDate: fullDateStr,
-                timeOnly: timeOnlyStr,
                 session: session,
+                date: fullDateStr,
+                timeOnly: timeOnlyStr,
+                time: `${fullDateStr} (${timeOnlyStr})`,
                 name: name,
-                memberId: memberId,
+                class: memberId,
                 status: status,
-                notes: notes,
-                time: `${fullDateStr} (${timeOnlyStr})`
+                notes: notes
             };
 
-            // Simpan ke LocalStorage
             let localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
             localData.push(record);
             localStorage.setItem('ec_seputas_attendance', JSON.stringify(localData));
 
-            // Kirim data ke Google Sheets
             if (GOOGLE_SCRIPT_URL) {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -150,14 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(record)
                 }).then(() => {
-                    // Refresh tabel live dari Google Sheets setelah delay 1.5 detik
                     setTimeout(() => {
                         loadLiveAttendanceData();
                     }, 1500);
                 }).catch(err => console.error('Error sending to Google Sheets:', err));
             }
 
-            // Notifikasi Sukses
             if (successToast) successToast.classList.remove('hidden');
             form.reset();
 
