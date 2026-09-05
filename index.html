@@ -3,58 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Club Seputas - Portal Member & Informasi</title>
+    <title>English Club Seputas - Official Website</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Header / Navbar -->
+    <!-- NAVBAR HEADER -->
     <header class="navbar">
-        <div class="logo-container">
-            <img src="logo.png" alt="Logo English Club Seputas" style="height: 40px; width: auto; object-fit: contain;">
-            <div class="logo-text">EC <span>SEPUTAS</span></div>
+        <div class="nav-container">
+            <div class="logo-container">
+                <!-- LOGO RESMI EC SEPUTAS -->
+                <img src="logo.png" alt="Logo English Club Seputas" style="height: 42px; width: auto; object-fit: contain;">
+                <div class="logo-text">EC <span>SEPUTAS</span></div>
+            </div>
+            <nav class="nav-links">
+                <a href="#announcement">Informasi & Poster</a>
+                <a href="#attendance" class="active">Absensi Member</a>
+            </nav>
         </div>
-        <nav class="nav-links">
-            <a href="#home">Beranda</a>
-            <a href="#announcements">Informasi & Poster</a>
-            <a href="#attendance">Absensi Member</a>
-        </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-badge">🌟 Welcome to Official Portal</div>
-        <h1 class="hero-title">English Club <span>Seputas</span></h1>
-        <p class="hero-subtitle">Platform resmi informasi, poster tutor invitation, dan presensi harian anggota English Club Seputas.</p>
-        <div class="hero-cta">
-            <a href="#attendance" class="btn btn-primary">⚡ Absen Sekarang</a>
-            <a href="#announcements" class="btn btn-secondary">📌 Lihat Jadwal & Poster</a>
-        </div>
-    </section>
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- SECTION 1: INVITATION & ANNOUNCEMENT -->
+        <section id="announcement" class="section-container">
+            <div class="section-header">
+                <h2>📢 Invitation & Session Info</h2>
+                <p>Informasi pertemuan mingguan dan poster tutor English Club Seputas</p>
+            </div>
 
-    <!-- Announcements & Poster Section -->
-    <section id="announcements" class="section container">
-        <div class="section-header">
-            <span class="tag">UPCOMING EVENT</span>
-            <h2>Invitation & Information</h2>
-            <p>Informasi tutor mingguan dan poster kegiatan terbaru English Club Seputas.</p>
-        </div>
-
-        <div class="grid-layout">
-            
-            <!-- Poster Card -->
             <div class="card poster-card">
-                <div class="badge-status">Next Meeting</div>
-                <div class="poster-image-area">
-                    <div class="poster-placeholder">
-                        <div class="icon">🖼️</div>
-                        <p>Upload Poster Tutor di sini</p>
-                        <small>(File: tutor-poster.jpg)</small>
-                    </div>
+                <!-- GAMBAR POSTER TUTOR -->
+                <div class="poster-image-area" style="height: auto;">
+                    <img src="tutor-poster.jpg" alt="Poster Tutor English Club" style="width: 100%; height: auto; display: block; border-radius: 12px 12px 0 0;">
                 </div>
+                
                 <div class="card-content">
                     <span class="category">Weekly Session</span>
                     <h3 class="card-title">Public Speaking & Confidence Masterclass</h3>
@@ -70,7 +55,7 @@
                     <div class="details-list">
                         <div class="detail-item">
                             <span class="icon">📅</span>
-                            <span>Jumat, 12 September 2026</span>
+                            <span>Sabtu, 5 September 2026</span>
                         </div>
                         <div class="detail-item">
                             <span class="icon">⏰</span>
@@ -83,144 +68,98 @@
                     </div>
 
                     <p class="event-desc">
-                        Sesi spesial minggu ini akan membahas cara mengatasi rasa gugup saat berbicara bahasa Inggris di depan umum. Don't miss it!
+                        Sesi spesial minggu ini akan membahas cara mengatasi rasa gugup saat berbicara bahasa Inggris di depan umum serta teknik menyusun ide argumen yang menarik. Don't miss it!
                     </p>
                 </div>
             </div>
+        </section>
 
-            <!-- Status Announcement Card -->
-            <div class="card info-card">
-                <div class="card-content">
-                    <span class="category info-tag">Club Status</span>
-                    <h3 class="card-title">📢 Status Pertemuan Minggu Ini</h3>
-                    <div class="status-banner">
-                        <span class="status-dot green"></span>
-                        <span class="status-text">Pertemuan Berjalan Sesuai Jadwal</span>
-                    </div>
-
-                    <div class="notice-box">
-                        <h4>Catatan Pengurus untuk Member:</h4>
-                        <ul>
-                            <li>Wajib datang tepat waktu sebelum jam 15.30 WIB.</li>
-                            <li>Membawa notebook / catatan masing-masing.</li>
-                            <li>Mengisi absensi di bagian bawah website ini setelah tiba di lokasi.</li>
-                        </ul>
-                    </div>
-
-                    <div class="quote-box">
-                        <p>"Speak to enrich your mind, not just to show off."</p>
-                        <small>- English Club Seputas Team</small>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Attendance Section -->
-    <section id="attendance" class="section container">
-        <div class="attendance-wrapper">
-            <div class="section-header center">
-                <span class="tag">PRESENSI MEMBER</span>
+        <!-- SECTION 2: FORM ABSENSI MEMBER -->
+        <section id="attendance" class="section-container">
+            <div class="section-header">
+                <span class="sub-title" style="color: #f59e0b; font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">PRESENSI MEMBER</span>
                 <h2>Absensi Kehadiran</h2>
                 <p>Silakan isi data presensi Anda. Keterangan hari dan tanggal tersimpan otomatis.</p>
                 
-                <!-- Live Date Badge -->
-                <div class="today-date-badge">
-                    <span class="icon">📆</span> Presensi Pertemuan Hari Ini: <strong id="currentDateText">Loading date...</strong>
+                <!-- CONTAINER TANGGAL AUTO-FILL -->
+                <div style="margin-top: 15px;">
+                    <span style="background: #fef3c7; color: #92400e; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+                        📅 Presensi Pertemuan Hari Ini: <strong id="currentDate">Memuat tanggal...</strong>
+                    </span>
                 </div>
             </div>
 
-            <div class="form-card">
+            <div class="card form-card" style="margin-top: 20px;">
                 <form id="attendanceForm">
-                    <!-- Event Session Info Selector -->
                     <div class="form-group">
                         <label for="sessionName">📌 Sesi Pertemuan / Pertemuan Ke-</label>
-                        <select id="sessionName" required>
+                        <select id="sessionName" name="session" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
                             <option value="Weekly Meeting - Public Speaking">Weekly Meeting - Public Speaking</option>
-                            <option value="Regular Class & Speaking Practice">Regular Class & Speaking Practice</option>
-                            <option value="Special Workshop / Event">Special Workshop / Event</option>
+                            <option value="Special Workshop">Special Workshop</option>
                         </select>
                     </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="fullName">Nama Lengkap Member</label>
-                            <input type="text" id="fullName" placeholder="Masukkan nama lengkap Anda" required>
+                    <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 200px;">
+                            <label for="memberName">Nama Lengkap Member *</label>
+                            <input type="text" id="memberName" name="name" placeholder="Masukkan nama lengkap Anda" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
                         </div>
-
-                        <div class="form-group">
-                            <label for="memberId">Kelas / ID Member</label>
-                            <input type="text" id="memberId" placeholder="Contoh: XI MIPA 2 / EC-012" required>
+                        <div class="form-group" style="flex: 1; min-width: 200px;">
+                            <label for="memberId">Kelas / ID Member *</label>
+                            <input type="text" id="memberId" name="class" placeholder="Contoh: XI MIPA 2 / EC-012" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="status">Status Kehadiran</label>
-                        <select id="status" required>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="status">Status Kehadiran *</label>
+                        <select id="status" name="status" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
                             <option value="">-- Pilih Status Kehadiran --</option>
-                            <option value="Hadir">Hadir (Present)</option>
-                            <option value="Izin">Izin (Permission)</option>
-                            <option value="Sakit">Sakit (Sick)</option>
+                            <option value="Hadir">Hadir</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="margin-top: 15px;">
                         <label for="notes">Catatan / Keterangan (Opsional)</label>
-                        <textarea id="notes" rows="3" placeholder="Tuliskan alasan jika Izin atau Sakit..."></textarea>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Tulis alasan jika Izin/Sakit..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;"></textarea>
                     </div>
 
-                    <button type="submit" class="btn-submit">
-                        <span>Kirim Presensi Sekarang</span> ✨
-                    </button>
+                    <button type="submit" class="btn-submit" style="margin-top: 20px; width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Kirim Presensi Sekarang ✨</button>
                 </form>
 
-                <div id="successMessage" class="toast hidden">
-                    🎉 Presensi Anda berhasil dicatat! Terima kasih telah berpartisipasi.
+                <!-- TOAST NOTIFIKASI -->
+                <div id="successToast" class="toast hidden" style="margin-top: 15px; padding: 12px; background: #10b981; color: white; border-radius: 8px; text-align: center;">
+                    ✅ Presensi berhasil dikirim dan terdaftar di database!
                 </div>
             </div>
 
-            <!-- Attendance Records Table -->
-            <div class="records-container">
-                <div class="records-header">
-                    <div>
-                        <h3>📊 Data Presensi Member</h3>
-                        <p class="sub-text">Rekap kehadiran beserta keterangan Hari & Tanggal pertemuan.</p>
-                    </div>
-                    <span id="recordCount" class="badge-count">0 Terdata</span>
-                </div>
-
+            <!-- TABEL REKAP ABSENSI -->
+            <div class="card table-card" style="margin-top: 30px;">
+                <h3>Daftar Presensi Hari Ini</h3>
                 <div class="table-responsive">
-                    <table id="attendanceTable">
+                    <table id="attendanceTable" style="width: 100%; border-collapse: collapse;">
                         <thead>
-                            <tr>
-                                <th>Hari & Tanggal</th>
-                                <th>Jam</th>
-                                <th>Sesi Pertemuan</th>
-                                <th>Nama Member</th>
-                                <th>Kelas / ID</th>
-                                <th>Status</th>
+                            <tr style="background: #f3f4f6; text-align: left;">
+                                <th style="padding: 10px;">No</th>
+                                <th style="padding: 10px;">Waktu</th>
+                                <th style="padding: 10px;">Nama</th>
+                                <th style="padding: 10px;">Kelas / ID</th>
+                                <th style="padding: 10px;">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="attendanceBody">
-                            <!-- Populated dynamically -->
+                        <tbody id="tableBody">
+                            <!-- Data dimasukkan dari JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
+        </section>
 
-        </div>
-    </section>
+    </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>English Club Seputas</h3>
-                <p>Inspiring confidence through English learning.</p>
-            </div>
-            <p class="copyright">&copy; 2026 English Club Seputas. Made with ✨ for Member Community.</p>
-        </div>
+    <footer class="footer" style="text-align: center; padding: 30px 0; color: #6b7280; font-size: 0.9rem;">
+        <p>&copy; 2026 English Club Seputas. Built with ✨ for Seputas Members.</p>
     </footer>
 
     <script src="script.js"></script>

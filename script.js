@@ -5,10 +5,12 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLViCqwsjJXW
 
 // DOM Elements
 const attendanceForm = document.getElementById('attendanceForm');
-const attendanceDateInput = document.getElementById('attendanceDate');
-const attendanceTimeInput = document.getElementById('attendanceTime');
+const currentDateSpan = document.getElementById('currentDate');
 const successToast = document.getElementById('successToast');
 const tableBody = document.getElementById('tableBody');
+
+let globalFormattedDate = '';
+let globalFormattedTime = '';
 
 // ==========================================
 // DATE & TIME AUTO-FILL
@@ -16,30 +18,28 @@ const tableBody = document.getElementById('tableBody');
 function updateDateTime() {
     const now = new Date();
     
-    // Format Tanggal (Contoh: Sabtu, 5 September 2026)
     const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateString = now.toLocaleDateString('id-ID', optionsDate);
-    
-    // Format Waktu (Contoh: 16.49 WIB)
-    const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    globalFormattedDate = now.toLocaleDateString('id-ID', optionsDate);
+    globalFormattedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
-    if (attendanceDateInput) attendanceDateInput.value = dateString;
-    if (attendanceTimeInput) attendanceTimeInput.value = timeString;
+    if (currentDateSpan) {
+        currentDateSpan.textContent = `${globalFormattedDate} (${globalFormattedTime})`;
+    }
 }
 
-// Update waktu saat halaman dibuka
 updateDateTime();
 
 // ==========================================
 // FETCH & DISPLAY DATA FROM GOOGLE SHEETS
 // ==========================================
 async function loadLiveAttendanceData() {
+    if (!tableBody) return;
+
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('PASTE_URL')) {
         tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">URL Database belum dikonfigurasi.</td></tr>`;
         return;
     }
 
-    // Tampilkan indikator loading saat mengambil data dari Google Sheets
     tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">🔄 Memuat data presensi terbaru...</td></tr>`;
 
     try {
@@ -57,39 +57,44 @@ async function loadLiveAttendanceData() {
         }
     } catch (error) {
         console.error('Gagal mengambil data dari Google Sheets:', error);
-        // Fallback ke data lokal jika koneksi terganggu
         loadLocalData();
     }
 }
 
-// Render data ke dalam tabel HTML
+// Render data ke dalam tabel HTML (Dibuat Fleksibel Membaca Berbagai Nama Kolom)
 function renderTable(dataList) {
-    tableBody.innerHTML = ''; // Bersihkan isi tabel
+    if (!tableBody) return;
+    tableBody.innerHTML = ''; 
     
-    // Urutkan agar data paling baru berada di baris paling atas
+    // Urutkan agar data terbaru muncul di paling atas
     const reversedData = [...dataList].reverse();
 
     reversedData.forEach((item, index) => {
         const row = document.createElement('tr');
         
-        // Penyesuaian gaya badge status
+        // Pembacaan nama (fleksibel mendukung berbagai nama properti)
+        const name = item.name || item.memberName || item.Nama || item['Nama Lengkap'] || item.nama || '-';
+        const memberClass = item.class || item.memberId || item.Kelas || item['Kelas / ID'] || item.kelas || '-';
+        const status = item.status || item.Status || 'Hadir';
+        const time = item.time || item.timeOnly || item.timestamp || item.Waktu || item.Tanggal || item.date || '-';
+
         let statusClass = 'badge-hadir';
-        if (item.status === 'Izin') statusClass = 'badge-izin';
-        if (item.status === 'Sakit') statusClass = 'badge-sakit';
+        if (status.toLowerCase().includes('izin')) statusClass = 'badge-izin';
+        if (status.toLowerCase().includes('sakit')) statusClass = 'badge-sakit';
 
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${item.time || item.timeOnly || item.timestamp || '-'}</td>
-            <td><strong>${item.name || item.memberName}</strong></td>
-            <td>${item.class || item.memberId}</td>
-            <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+            <td>${time}</td>
+            <td><strong>${name}</strong></td>
+            <td>${memberClass}</td>
+            <td><span class="status-badge ${statusClass}">${status}</span></td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// Fallback jika fetch gagal (membaca LocalStorage)
 function loadLocalData() {
+    if (!tableBody) return;
     const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
     if (localData.length > 0) {
         renderTable(localData);
@@ -105,23 +110,29 @@ if (attendanceForm) {
     attendanceForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        const sessionInput = document.querySelector('select[name="session"], input[name="session"]') || document.getElementById('sessionName');
+        const nameInput = document.querySelector('input[name="name"]') || document.getElementById('memberName');
+        const classInput = document.querySelector('input[name="class"]') || document.getElementById('memberId');
+        const statusInput = document.querySelector('select[name="status"]') || document.getElementById('status');
+        const notesInput = document.querySelector('textarea[name="notes"]') || document.getElementById('notes');
+
         const record = {
-            session: document.getElementById('sessionName').value,
-            date: attendanceDateInput.value,
-            timeOnly: attendanceTimeInput.value,
-            time: `${attendanceDateInput.value} (${attendanceTimeInput.value})`,
-            name: document.getElementById('memberName').value,
-            class: document.getElementById('memberId').value,
-            status: document.getElementById('status').value,
-            notes: document.getElementById('notes').value
+            session: sessionInput ? sessionInput.value : 'Weekly Session',
+            date: globalFormattedDate,
+            timeOnly: globalFormattedTime,
+            time: `${globalFormattedDate} (${globalFormattedTime})`,
+            name: nameInput ? nameInput.value : '',
+            class: classInput ? classInput.value : '',
+            status: statusInput ? statusInput.value : 'Hadir',
+            notes: notesInput ? notesInput.value : ''
         };
 
-        // 1. Simpan sementara ke LocalStorage
+        // Simpan sementara ke LocalStorage
         const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
         localData.unshift(record);
         localStorage.setItem('ec_seputas_attendance', JSON.stringify(localData));
 
-        // 2. Kirim ke Google Sheets Database
+        // Kirim ke Google Sheets Database
         if (GOOGLE_SCRIPT_URL) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -129,23 +140,20 @@ if (attendanceForm) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(record)
             }).then(() => {
-                // Beri jeda 1.5 detik lalu muat ulang tabel secara live dari Sheets
                 setTimeout(() => {
                     loadLiveAttendanceData();
                 }, 1500);
             }).catch(err => console.error('Error sending to Google Sheets:', err));
         }
 
-        // 3. Tampilkan Notifikasi Sukses & Reset Form
-        successToast.classList.remove('hidden');
+        if (successToast) successToast.classList.remove('hidden');
         attendanceForm.reset();
-        updateDateTime(); // Isi kembali tanggal & waktu otomatis
+        updateDateTime(); 
 
         setTimeout(() => {
-            successToast.classList.add('hidden');
+            if (successToast) successToast.classList.add('hidden');
         }, 4000);
     });
 }
 
-// Muat data live dari Google Sheets saat halaman pertama kali dibuka
 document.addEventListener('DOMContentLoaded', loadLiveAttendanceData);
