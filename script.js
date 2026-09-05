@@ -61,26 +61,23 @@ async function loadLiveAttendanceData() {
     }
 }
 
-// Render data ke dalam tabel HTML (Dibuat Fleksibel Membaca Berbagai Nama Kolom)
 function renderTable(dataList) {
     if (!tableBody) return;
     tableBody.innerHTML = ''; 
     
-    // Urutkan agar data terbaru muncul di paling atas
     const reversedData = [...dataList].reverse();
 
     reversedData.forEach((item, index) => {
         const row = document.createElement('tr');
         
-        // Pembacaan nama (fleksibel mendukung berbagai nama properti)
         const name = item.name || item.memberName || item.Nama || item['Nama Lengkap'] || item.nama || '-';
         const memberClass = item.class || item.memberId || item.Kelas || item['Kelas / ID'] || item.kelas || '-';
         const status = item.status || item.Status || 'Hadir';
         const time = item.time || item.timeOnly || item.timestamp || item.Waktu || item.Tanggal || item.date || '-';
 
         let statusClass = 'badge-hadir';
-        if (status.toLowerCase().includes('izin')) statusClass = 'badge-izin';
-        if (status.toLowerCase().includes('sakit')) statusClass = 'badge-sakit';
+        if (status.toString().toLowerCase().includes('izin')) statusClass = 'badge-izin';
+        if (status.toString().toLowerCase().includes('sakit')) statusClass = 'badge-sakit';
 
         row.innerHTML = `
             <td>${index + 1}</td>
@@ -110,11 +107,11 @@ if (attendanceForm) {
     attendanceForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const sessionInput = document.querySelector('select[name="session"], input[name="session"]') || document.getElementById('sessionName');
-        const nameInput = document.querySelector('input[name="name"]') || document.getElementById('memberName');
-        const classInput = document.querySelector('input[name="class"]') || document.getElementById('memberId');
-        const statusInput = document.querySelector('select[name="status"]') || document.getElementById('status');
-        const notesInput = document.querySelector('textarea[name="notes"]') || document.getElementById('notes');
+        const sessionInput = document.getElementById('sessionName');
+        const nameInput = document.getElementById('memberName');
+        const classInput = document.getElementById('memberId');
+        const statusInput = document.getElementById('status');
+        const notesInput = document.getElementById('notes');
 
         const record = {
             session: sessionInput ? sessionInput.value : 'Weekly Session',
@@ -127,12 +124,10 @@ if (attendanceForm) {
             notes: notesInput ? notesInput.value : ''
         };
 
-        // Simpan sementara ke LocalStorage
         const localData = JSON.parse(localStorage.getItem('ec_seputas_attendance')) || [];
         localData.unshift(record);
         localStorage.setItem('ec_seputas_attendance', JSON.stringify(localData));
 
-        // Kirim ke Google Sheets Database
         if (GOOGLE_SCRIPT_URL) {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
