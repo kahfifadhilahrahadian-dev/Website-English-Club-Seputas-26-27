@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentDateText = document.getElementById('currentDateText');
 
     // PASTE YOUR GOOGLE APPS SCRIPT URL HERE IF AVAILABLE
-    const GOOGLE_SCRIPT_URL = 'PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec';
 
     // Helper: Format Date to Indonesian Day and Date (e.g., Jumat, 12 September 2026)
     function getFormattedDate(dateObj) {
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTable();
 
         // Send to Google Sheets if configured
-        if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec') {
+        if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI') {
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
