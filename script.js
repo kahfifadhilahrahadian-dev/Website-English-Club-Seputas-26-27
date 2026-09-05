@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIGURATION & DATABASE URL
 // ==========================================
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybHL3N1f9BlZIFwzBuHG8ZAX3hrZrFB5Y-iGXRS_sS283EV5wHbOHJwCaA1p84LZyUug/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnZVk6PrF9XjWz5uaZz5IrwpGaAyUL66SQR5_xQlJKy328OiN2_nWKn0tPFxd8c-Bv0A/exec';
 
 // DOM Elements
 const attendanceForm = document.getElementById('attendanceForm');
