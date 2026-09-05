@@ -69,30 +69,32 @@ document.addEventListener('DOMContentLoaded', () => {
         reversedData.forEach(item => {
             const tr = document.createElement('tr');
             
-            // PEMETAAN KOLOM PRESISI SESUAI STRUKTUR DATABASE GOOGLE SHEETS
-            // 1. Sesi Pertemuan (misal: "Weekly Meeting - Public Speaking")
-            const session = item.session || item.Sesi || 'Weekly Meeting';
+            // SESUAI DENGAN OBJECT APPS SCRIPT KAMU:
+            // { session, date, timeOnly, time, name, class, status, notes }
 
-            // 2. Format Tanggal (Mencegah format ISO T07:00:00.000Z)
-            let fullDate = item.date || item.fullDate || item.Tanggal || getFormattedDate(new Date());
-            if (fullDate.includes('T') && fullDate.includes('Z')) {
+            // 1. Tanggal
+            let fullDate = item.date || getFormattedDate(new Date());
+            if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
                 const parsedDate = new Date(fullDate);
                 fullDate = isNaN(parsedDate.getTime()) ? getFormattedDate(new Date()) : getFormattedDate(parsedDate);
             }
 
-            // 3. Jam / Waktu
-            const timeOnly = item.timeOnly || item.time || item.Waktu || '-';
+            // 2. Waktu/Jam
+            const timeOnly = item.timeOnly || item.time || '-';
 
-            // 4. Nama Lengkap Member (Mencegah tergeser ke status/catatan)
-            const name = item.name || item.fullName || item.memberName || item.Nama || '-';
+            // 3. Sesi Pertemuan
+            const session = item.session || 'Weekly Meeting';
+
+            // 4. Nama Member
+            const name = item.name || '-';
 
             // 5. Kelas / ID
-            const memberId = item.class || item.memberId || item.Kelas || '-';
+            const memberClass = item.class || '-';
 
-            // 6. Status Kehadiran (Hadir / Izin / Sakit)
-            const status = item.status || item.Status || 'Hadir';
+            // 6. Status Kehadiran
+            const status = item.status || 'Hadir';
 
-            // Style Badge Khusus Kolom Status (Background Hijau/Kuning/Merah hanya di teks status)
+            // Style Badge Status
             let statusBadgeStyle = 'color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
             if (status.toString().toLowerCase().includes('izin')) {
                 statusBadgeStyle = 'color: #d97706; background: #fef3c7; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
@@ -100,13 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusBadgeStyle = 'color: #dc2626; background: #fee2e2; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; display: inline-block;';
             }
 
-            // PERBAIKAN URUTAN BARIS TABEL (HTML TH: Tanggal | Jam | Sesi | Nama | Kelas | Status)
+            // MASUKKAN KE TABEL DENGAN URUTAN HEADER HTML V2:
+            // Hari & Tanggal | Jam | Sesi Pertemuan | Nama Member | Kelas/ID | Status
             tr.innerHTML = `
                 <td><span class="date-pill">📅 ${fullDate}</span></td>
                 <td style="color: #64748b; font-size: 0.85rem; font-weight: 600;">${timeOnly}</td>
                 <td><span class="session-pill">${session}</span></td>
                 <td style="font-weight: 700; color: #1e293b;">${name}</td>
-                <td style="color: #475569; font-weight: 600;">${memberId}</td>
+                <td style="color: #475569; font-weight: 600;">${memberClass}</td>
                 <td><span style="${statusBadgeStyle}">${status}</span></td>
             `;
             tableBody.appendChild(tr);
@@ -165,4 +168,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 4000);
         });
     }
-});
+});s
